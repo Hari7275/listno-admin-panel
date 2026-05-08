@@ -173,6 +173,132 @@ updateCoachStatus: builder.mutation({
   }),
 }),
 
+getRecentActivity: builder.query({
+  query: ({ userId }) => ({
+    url: "/experience/listeno/graphql",
+    method: "POST",
+    body: {
+      query: `
+        query GetRecentActivity($userId: ID!) {
+          recentActivity(userId: $userId) {
+            time
+            title
+            description
+          }
+        }
+      `,
+      variables: { userId },
+    },
+  }),
+}),
+
+getCoachPerformance: builder.query({
+  query: ({ coachId }) => ({
+    url: "/experience/listeno/graphql",
+    method: "POST",
+    body: {
+      query: `
+        query GetCoachPerformance($coachId: ID!) {
+          coachPerformance(coachId: $coachId) {
+            coreMetrics {
+              acceptanceRate
+              averageDuration
+              missedIgnoredCalls
+              userRetentionRate
+            }
+
+            reviewRating {
+              averageRating
+              totalSessions
+
+              breakdown {
+                star
+                percentage
+              }
+            }
+          }
+        }
+      `,
+      variables: { coachId },
+    },
+  }),
+}),
+
+getCoachFinancials: builder.query({
+  query: ({ coachId }) => ({
+    url: "/experience/listeno/graphql",
+    method: "POST",
+    body: {
+      query: `
+        query {
+          coachFinancials(
+            coachId: "${coachId}"
+          ) {
+
+            overview {
+              lifetimeEarnings
+              availableBalance
+              pendingClearance
+              penalties
+            }
+
+            summary {
+              todayEarnings
+              weekEarnings
+              monthEarnings
+            }
+
+            recentTransactions {
+
+              transactions {
+                id
+                type
+                title
+                subtitle
+                amount
+                status
+                transactionNature
+                dateTime
+              }
+
+              pagination {
+                page
+                size
+                totalElements
+                hasNext
+              }
+            }
+          }
+        }
+      `,
+      variables: {},
+    },
+  }),
+}),
+
+getActivityLogs: builder.query({
+  query: ({ userId }) => ({
+    url: "/experience/listeno/graphql",
+    method: "POST",
+    body: {
+      query: `
+        query {
+
+          activityLogs(
+            userId: "${userId}"
+          ) {
+
+            time
+            action
+            details
+            ipDevice
+          }
+        }
+      `,
+      variables: {},
+    },
+  }),
+}),
 
   }),
 });
@@ -182,4 +308,8 @@ export const {useCreateRegisterDeviceMutation,
   useGetAdminCoachDashboardQuery,
   useGetAdminCoachProfileQuery,
     useUpdateCoachStatusMutation, 
+    useGetRecentActivityQuery,
+    useGetCoachPerformanceQuery,
+    useGetCoachFinancialsQuery,
+    useGetActivityLogsQuery,
 } = adminUserSlice;
