@@ -22,6 +22,14 @@ import {
   ChevronDown,
   ChevronRight,
   Headphones,
+  BookOpen,
+  Wallet,
+  Flame,
+  Gift,
+  SlidersVertical,
+  Tag,
+  TrendingUp,
+  Sparkle,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -72,8 +80,83 @@ export default function AdminLayout() {
         },
       ],
     },
+
+    {
+      name: "Creator Console",
+      icon: Sparkle,
+      subItems: [
+       {
+          name: "My Dashboard",
+          icon: LayoutDashboard,
+          path: "/adminPanel/creatorConsole/myDashboard",
+        },
+
+       {
+          name: "My Referrals",
+          icon: Users,
+          path: "/adminPanel/creatorConsole/myReferrals",
+        },
+
+         {
+          name: "Earnings & Payouts",
+          icon: Wallet,
+          path: "/adminPanel/creatorConsole/earnings",
+        },
+         {
+          name: "Settings",
+          icon: Settings,
+          path: "/adminPanel/creatorConsole/settings",
+        },
+
+      ],
+
+    },
+
+    {
+      name: "Offers",
+      icon: Flame,
+      subItems: [
+       {
+          name: "Offers Dashboard",
+          icon: LayoutDashboard,
+          path: "/adminPanel/Offers/dashboard",
+        },
+
+       {
+          name: "Offer Management",
+          icon: Gift,
+          path: "/adminPanel/Offers/offerManagement",
+        },
+
+         {
+          name: "Rule Engine",
+          icon: SlidersVertical,
+          path: "/adminPanel/Offers/ruleEngine",
+        },
+         {
+          name: "Listener Pricing",
+          icon: Tag,
+          path: "/adminPanel/Offers/listenerPricing",
+        },
+
+         {
+          name: "Subscription",
+          icon: CreditCard,
+          path: "/adminPanel/Offers/subscription",
+        },
+         {
+          name: "User Insights",
+          icon: TrendingUp,
+          path: "/adminPanel/Offers/userInsights",
+        },
+      ],
+
+    },
+
+
     { name: "Users", icon: Users, path: "/adminPanel/users" },
     { name: "Coaches", icon: UserCheck, path: "/adminPanel/coaches" },
+     { name: "Knowledge Center", icon: BookOpen, path: "/adminPanel/knowledgeCenter" },
     { name: "Sessions", icon: Video, path: "/adminPanel/sessions" },
     { name: "Payments", icon: CreditCard, path: "/adminPanel/payments" },
     { name: "Content", icon: FileText, path: "/adminPanel/content" },

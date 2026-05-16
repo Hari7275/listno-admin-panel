@@ -300,6 +300,66 @@ getActivityLogs: builder.query({
   }),
 }),
 
+getAdminLiveMonitoring: builder.query({
+      query: () => ({
+        url: "/experience/listeno/graphql",
+        method: "POST",
+        body: {
+          query: `
+            query {
+              adminLiveMonitoring {
+                liveCalls
+                listenersOnline
+                earningsPerHour
+                sessions {
+                  coachId
+                  listener
+                  duration
+                  status
+                  type
+                  takingWith
+                  currentEarnings
+                  profilePhoto
+                }
+              }
+            }
+          `,
+          variables: {},
+        },
+      }),
+      providesTags: ['LiveMonitor'],
+    }),
+
+getDailyPerformance: builder.query({
+      query: ({sortBy = "calls", type, level } = {}) => ({
+        url: "/experience/listeno/graphql",
+        method: "POST",
+        body: {
+          query: `
+            query GetDailyPerformance($sortBy: String, $type: String, $level: String) {
+              dailyPerformance(sortBy: $sortBy, type: $type, level: $level) {
+                totalCallsToday
+                avgCallDuration
+                totalTalkTime
+                missedRejected
+                listeners {
+                  listener
+                  profilePhoto
+                  type
+                   missedRejected
+                  totalCalls
+                  talkTimeToday
+                  avgDuration
+                }
+              }
+            }
+          `,
+          variables: { sortBy },
+        },
+      }),
+      providesTags: ['DailyPerformance'],
+    }),
+
   }),
 });
 
@@ -312,4 +372,6 @@ export const {useCreateRegisterDeviceMutation,
     useGetCoachPerformanceQuery,
     useGetCoachFinancialsQuery,
     useGetActivityLogsQuery,
+    useGetAdminLiveMonitoringQuery,
+    useGetDailyPerformanceQuery,
 } = adminUserSlice;

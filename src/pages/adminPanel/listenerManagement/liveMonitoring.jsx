@@ -1,39 +1,6 @@
 import React, { useState } from "react";
-import { Activity, Bell, HeartPulse, ArrowRight, DollarSign, X, Wifi, UserCheck } from "lucide-react";
-
-// Matches data shown in the video list
-const listenersOnCall = [
-  {
-    name: "Anjali K.",
-    id: "L-104",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    type: "EXTERNAL",
-    status: "On Call",
-    talkingWith: "U-8821",
-    duration: "09:44",
-    earnings: "876",
-  },
-  {
-    name: "Vikram S.",
-    id: "L-305",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    type: "INTERNAL",
-    status: "On Call",
-    talkingWith: "U-1192",
-    duration: "06:00",
-    earnings: "288",
-  },
-  {
-    name: "Rohan D.",
-    id: "L-511",
-    avatar: "https://randomuser.me/api/portraits/men/55.jpg",
-    type: "EXTERNAL",
-    status: "Online",
-    talkingWith: "--",
-    duration: "--:--",
-    earnings: "0",
-  },
-];
+import { Activity,AlertCircle,CircleAlert, Send,Bell, HeartPulse, ArrowRight, DollarSign, X, Wifi, UserCheck } from "lucide-react";
+import { useGetAdminLiveMonitoringQuery } from "../../../store/api/auth/adminLogin";
 
 
 export default function LiveMonitoringPage() {
@@ -41,10 +8,23 @@ export default function LiveMonitoringPage() {
   const [selectedListener, setSelectedListener] = useState(null);
   const [nudgePreset, setNudgePreset] = useState("Check Mic");
 
-  const closeModal = () => {
+  // 2. Fetch data from the API with polling (e.g., every 5 seconds for live monitoring)
+  const { data, isLoading, isError } = useGetAdminLiveMonitoringQuery(undefined, {
+    pollingInterval: 5000, 
+  });
+
+  // 3. Extract data from the GraphQL response structure
+  const monitorData = data?.data?.adminLiveMonitoring;
+  const sessions = monitorData?.sessions || [];
+
+const closeModal = () => {
     setActiveModal(null);
     setSelectedListener(null);
   };
+
+  // Optional: Loading State
+  if (isLoading && !data) return <div className="p-10 text-center font-bold">Loading Live Feed...</div>;
+  if (isError) return <div className="p-10 text-center text-red-500">Error loading live monitoring data.</div>;
 
   return (
     <div className=" font-sans">
@@ -67,15 +47,15 @@ export default function LiveMonitoringPage() {
       {/* Stats Cards Grid - Matched to image_55fefb.jpg */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {[
-          { title: "Currently Live Calls", value: "24", change: "12%" },
-          { title: "Listeners Online", value: "142", change: null },
-          { title: "Live Platform Earnings/Hr", value: "₹45,000", change: "5%", unit: "Hr" },
+          { title: "Currently Live Calls", value: monitorData?.liveCalls || "0", change: "12%" },
+          { title: "Listeners Online", value: monitorData?.listenersOnline || "0", change: null },
+          { title: "Live Platform Earnings/Hr", value:`₹${monitorData?.earningsPerHour?.toLocaleString() || "0"}`, change: "5%", unit: "Hr" },
         ].map((card, idx) => (
           <div key={idx} className="bg-white p-7 rounded-[22px] border border-[#f1ece6] shadow-sm flex-1">
             <p className="text-[14px] text-gray-500 font-medium mb-4">{card.title}</p>
             
             <div className="flex items-baseline gap-1">
-              <h3 className="text-[40px] font-bold text-gray-950 tracking-tight leading-none">
+              <h3 className="text-[30px] font-bold text-gray-950 tracking-tight leading-none">
                 {card.value}
               </h3>
               {card.unit && (
@@ -111,15 +91,15 @@ export default function LiveMonitoringPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f3ede7]">
-              {listenersOnCall.map((listener, idx) => (
+              {sessions.map((session, idx) => (
                 <tr key={idx} className="hover:bg-[#faf7f4] transition-colors group">
                   {/* Listener Info */}
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <img src={listener.avatar} alt="" className="w-11 h-11 rounded-full object-cover border border-gray-100" />
+                      <img src={session.profilePhoto} alt="" className="w-11 h-11 rounded-full object-cover border border-gray-100" />
                       <div>
-                        <p className="font-bold text-[14px] text-gray-900 leading-tight">{listener.name}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5 uppercase">{listener.id}</p>
+                        <p className="font-bold text-[14px] text-gray-900 leading-tight">{session.listener}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 uppercase">{session.coachId}</p>
                       </div>
                     </div>
                   </td>
@@ -127,9 +107,9 @@ export default function LiveMonitoringPage() {
                   {/* Type Badge */}
                   <td className="px-6 py-5">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${
-                      listener.type === "INTERNAL" ? "bg-[#efe7ff] text-purple-600" : "bg-gray-100 text-gray-600"
+                      session.type === "INTERNAL" ? "bg-[#efe7ff] text-purple-600" : "bg-gray-100 text-gray-600"
                     }`}>
-                      {listener.type}
+                      {session.type}
                     </span>
                   </td>
 
@@ -138,48 +118,48 @@ export default function LiveMonitoringPage() {
   <div className="flex items-center gap-2.5">
     <div className="relative flex h-2 w-2">
       {/* The glowing outer pulse - only for "On Call" */}
-      {listener.status === "On Call" && (
+      {session.status === "On Call" && (
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
       )}
       {/* The solid center dot */}
       <span className={`relative inline-flex rounded-full h-2 w-2 ${
-        listener.status === "On Call" ? "bg-blue-600" : "bg-green-500"
+        session.status === "On Call" ? "bg-blue-600" : "bg-green-500"
       }`}></span>
     </div>
     <span className={`text-[13px] font-bold ${
-      listener.status === "On Call" ? "text-blue-600" : "text-green-600"
+      session.status === "On Call" ? "text-blue-600" : "text-green-600"
     }`}>
-      {listener.status}
+      {session.status}
     </span>
   </div>
 </td>
 
                   {/* Talking With */}
                   <td className="px-6 py-5 text-[13px] text-gray-600 font-semibold text-center">
-                    {listener.talkingWith}
+                    {session.talkingWith}
                   </td>
 
                   {/* Duration */}
                   <td className="px-6 py-5 text-[13px] text-gray-900 font-bold tabular-nums">
-                    {listener.duration}
+                    {session.duration}
                   </td>
 
                   {/* Current Earnings */}
                   <td className="px-6 py-5 text-[13px] text-green-600 font-bold">
-                    ₹{listener.earnings}
+                    ₹{session.currentEarnings}
                   </td>
 
                   {/* Admin Actions - Updated Icons and Layout */}
                   <td className="px-6 py-5 text-right pr-8">
                     <div className="flex items-center gap-3 justify-end">
                       <button 
-                        onClick={() => { setSelectedListener(listener); setActiveModal('health'); }}
+                        onClick={() => { setSelectedListener(session); setActiveModal('health'); }}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-blue-100 text-blue-600 text-[12px] font-bold hover:bg-blue-600 hover:text-white transition-all duration-200"
                       >
                         <Activity size={25} /> Connection Health
                       </button>
                       <button 
-                        onClick={() => { setSelectedListener(listener); setActiveModal('nudge'); }}
+                        onClick={() => { setSelectedListener(session); setActiveModal('nudge'); }}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-100 text-gray-600 text-[12px] font-bold hover:bg-gray-900 hover:text-white transition-all duration-200"
                       >
                         <Bell size={25} /> System Nudge
@@ -272,46 +252,88 @@ export default function LiveMonitoringPage() {
   </Modal>
 )}
 
-      {activeModal === 'nudge' && (
-        <Modal title="System Nudge" subtitle={`Target: ${selectedListener?.name} (${selectedListener?.id})`} onClose={closeModal}>
-          <div className="space-y-6">
-            <div>
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 block">Choose Preset Alert</label>
-              <div className="flex flex-wrap gap-2">
-                {["Check Mic", "Shift Ending", "Wrap Up"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setNudgePreset(type)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200 ${nudgePreset === type ? 'bg-purple-600 border-purple-600 text-white shadow-md transform scale-105' : 'bg-white border-gray-100 text-gray-500 hover:border-purple-200 hover:text-purple-600'}`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Message Preview</label>
-              <textarea 
-                className="w-full border-2 border-gray-50 rounded-2xl p-4 text-sm text-gray-700 focus:border-purple-100 focus:bg-purple-50/10 outline-none h-28 resize-none transition-all"
-                placeholder="Type custom nudge message..."
-                value={nudgePreset === "Wrap Up" ? "Please wrap up the current call shortly." : nudgePreset === "Check Mic" ? "Please check your microphone connection." : "Your shift ends in 10 minutes."}
-                readOnly
-              />
-            </div>
-            <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex gap-3">
-               <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Activity size={14} className="text-blue-600" />
-               </div>
-               <p className="text-[11px] text-blue-700 font-medium leading-relaxed">
-                 Nudges are delivered instantly to the listener's dashboard as a priority notification. <span className="font-bold underline">End-users cannot see these communications.</span>
-               </p>
-            </div>
-            <button className="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-2xl font-bold text-sm shadow-[0_4px_12px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.4)] transition-all active:scale-[0.98]">
-              Send Silent Alert
+
+
+{activeModal === 'nudge' && (
+  <Modal onClose={closeModal}>
+    {/* Header Section 
+        - Removed the manual <button> with <X /> icon 
+        - The Modal component's built-in X will now be the only one visible
+    */}
+    <div className="bg-gray-50/80 -mx-6 -mt-6 p-5 mb-5 border-b border-gray-100 relative rounded-t-3xl">
+      <div className="flex items-center gap-3">
+        {/* Amber Bell Icon Container */}
+        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+          <Bell size={20} className="text-amber-500 fill-amber-500/10" />
+        </div>
+        
+        <div className="flex flex-col">
+          <h2 className="text-lg font-bold text-gray-900 leading-tight">System Nudge</h2>
+          <p className="text-xs text-gray-500 font-medium">
+            Send silent alert to {selectedListener?.name || 'Anjali K.'}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Form Content Section */}
+    <div className="space-y-4 px-1">
+      
+      {/* Quick Presets Section */}
+      <div>
+        <label className="text-xs font-semibold text-gray-700 mb-2 block">Quick Presets</label>
+        <div className="flex flex-wrap gap-2">
+          {["Check Mic", "Shift Ending", "Wrap Up"].map((type) => (
+            <button
+              key={type}
+              onClick={() => setNudgePreset(type)}
+              className={`px-4 py-1.5 rounded-full text-[11px] font-medium border transition-all ${
+                nudgePreset === type 
+                ? 'border-blue-600 bg-blue-50 text-blue-600 shadow-sm' 
+                : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'
+              }`}
+            >
+              {type}
             </button>
-          </div>
-        </Modal>
-      )}
+          ))}
+        </div>
+      </div>
+
+      {/* Custom Message Section */}
+      <div>
+        <label className="text-xs font-semibold text-gray-700 mb-2 block">Custom Message</label>
+        <textarea 
+          className="w-full border border-gray-200 bg-gray-50/30 rounded-2xl p-3 text-sm text-gray-700 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none h-20 resize-none transition-all"
+          placeholder="Type notification here..."
+          value={nudgePreset}
+          onChange={(e) => setNudgePreset(e.target.value)}
+        />
+      </div>
+
+      {/* Information Alert Box */}
+      <div className="bg-[#f0f7ff] border border-blue-100 p-3 rounded-2xl flex items-start gap-2">
+         <CircleAlert size={16} className="text-blue-500 mt-0.5 flex-shrink-0" />
+         <p className="text-[12px] text-blue-800 leading-snug">
+           This message will appear as a subtle toast notification. <span className="font-bold underline">The user will not see this.</span>
+         </p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-1">
+        <button 
+          onClick={closeModal}
+          className="flex-1 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold text-xs hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button className="flex-1 py-3 bg-[#2563eb] hover:bg-blue-700 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10 transition-all active:scale-[0.98]">
+          <Send size={14} />
+          <span>Send Nudge</span>
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
     </div>
   );
 }

@@ -13,7 +13,13 @@ import DailyPerformancePage from "../pages/adminPanel/listenerManagement/dailyPe
 import EarningsPayoutsPage from "../pages/adminPanel/listenerManagement/earnings";
 import ListenerApprovalsPage from "../pages/adminPanel/listenerManagement/listenerApprovals";
 import ListenerProfile from "../pages/adminPanel/listenerManagement/Listeners";
+import KnowledgeCenter from "../pages/adminPanel/knowledgeCenter";
 import AdminLayout from "../components/AdminLayout";
+import DashboardContent from "../pages/adminPanel/creatorConsole/myDashboard";
+import ReferralPage from "../pages/adminPanel/creatorConsole/myReferrals";
+import ReferralDashboard from "../pages/adminPanel/creatorConsole/myReferrals";
+import OffersDashboard from "../pages/adminPanel/Offers/dashboard";
+import OfferManagement from "../pages/adminPanel/Offers/offerManagement";
 
 const AppRoutes = () => {
   return (
@@ -36,9 +42,26 @@ const AppRoutes = () => {
 
           </Route>
 
+          <Route path="creatorConsole">
+              <Route path="myDashboard" element={<DashboardContent/>} />
+              <Route path="myReferrals" element={<ReferralDashboard/>} />
+              <Route path="earnings" element={<div>Creator Earnings</div>} />
+              <Route path="settings" element={<div>Creator Settings</div>} />
+            </Route>"
+
+              <Route path="Offers">
+              <Route path="dashboard" element={<OffersDashboard/>} />
+              <Route path="offerManagement" element={<OfferManagement/>} />
+              <Route path="ruleEngine" element={<div>Rule Engine</div>} />
+              <Route path="listenerPricing" element={<div>Listener Pricing</div>} />
+              <Route path="subscription" element={<div>Subscription</div>} />
+              <Route path="userInsights" element={<div>User Insights</div>} />
+            </Route>"
+
 
 
           <Route path="users" element={<UserManagement />} />
+          <Route path="knowledgeCenter" element={<KnowledgeCenter />} />
           <Route path="coaches" element={<div>Coaches Page</div>} />
           <Route path="sessions" element={<div>Sessions Page</div>} />
           <Route path="payments" element={<div>Payments Page</div>} />
