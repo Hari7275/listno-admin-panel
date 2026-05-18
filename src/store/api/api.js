@@ -34,13 +34,14 @@ const baseQuery = fetchBaseQuery({
     }
 
     headers.set("X-Device-Id", deviceId);
-    headers.set("X-Device-Type", "WEB");
+    headers.set("X-Platform-Type", "WEB");
     headers.set("X-App-Version", "1.0.0");
     headers.set("X-App-Integrity", "<REAL_TOKEN>");
     headers.set("X-Language", "en");
     headers.set("X-Timezone", "Asia/Kolkata");
     headers.set("X-ISD-Code", "IN");
    headers.set("Content-Type", "application/json");
+   headers.set("X-App-Type", "ADMIN");
 
 
     return headers;
@@ -63,5 +64,6 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
+  tagTypes: ["Users", "AdminUsersList", "listno", "LiveMonitor", "DailyPerformance"],
   endpoints: () => ({}),
 });

@@ -7,11 +7,20 @@ import {
 const OfferManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const offers = [
+  // Managed state array allows React to detect changes and animate the toggle
+  const [offers, setOffers] = useState([
     { id: 1, name: 'Diwali Dhamaka', type: 'Festival', discount: '50% OFF', validity: '20 Oct - 25 Oct', limit: '2 / user', priority: 1, status: true },
     { id: 2, name: 'Welcome Bonus', type: 'New User', discount: 'Flat ₹100', validity: 'Always Active', limit: '1 / user', priority: 10, status: true },
     { id: 3, name: 'Midnight Happy Hour', type: 'Happy Hour', discount: '10 Free Mins', validity: 'Daily (12AM - 2AM)', limit: '1 / user', priority: 5, status: false },
-  ];
+  ]);
+  
+  const handleToggleStatus = (id) => {
+    setOffers((currentOffers) =>
+      currentOffers.map((offer) =>
+        offer.id === id ? { ...offer, status: !offer.status } : offer
+      )
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans">
@@ -83,13 +92,25 @@ const OfferManagement = () => {
                   <td className="p-4 text-xs text-slate-500 font-medium">{offer.validity}</td>
                   <td className="p-4 text-xs text-slate-500 font-medium text-center">{offer.limit}</td>
                   <td className="p-4 text-center font-bold text-slate-700">{offer.priority}</td>
+                  
+                  {/* STATUS TOGGLE COLUMN */}
                   <td className="p-4">
                     <div className="flex justify-center">
-                      <div className={`w-10 h-5 rounded-full relative transition-colors cursor-pointer ${offer.status ? 'bg-emerald-500' : 'bg-slate-200'}`}>
-                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${offer.status ? 'left-6' : 'left-1'}`}></div>
+                      <div
+                        onClick={() => handleToggleStatus(offer.id)}
+                        className={`w-10 h-5 rounded-full relative transition-colors duration-300 cursor-pointer ${
+                          offer.status ? 'bg-emerald-500' : 'bg-slate-300'
+                        }`}
+                      >
+                        <div
+                          className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-300 ${
+                            offer.status ? 'left-6' : 'left-1'
+                          }`}
+                        ></div>
                       </div>
                     </div>
                   </td>
+
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><Edit2 size={16}/></button>
@@ -104,61 +125,150 @@ const OfferManagement = () => {
       </div>
 
       {/* Create Offer Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h2 className="text-xl font-black text-slate-900">Create New Offer</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-100 shadow-sm"><X size={20}/></button>
-            </div>
-            
-            <div className="p-8 grid grid-cols-2 gap-6">
-              <div className="col-span-2">
-                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Offer Name</label>
-                <input type="text" placeholder="e.g. Diwali Special" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" />
-              </div>
-              
-              <div>
-                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Offer Type</label>
-                <div className="relative">
-                  <select className="w-full appearance-none px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none">
-                    <option>Festival</option>
-                    <option>New User</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Discount Type</label>
-                <div className="relative">
-                  <select className="w-full appearance-none px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none">
-                    <option>Percent (%)</option>
-                    <option>Flat Amount</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                </div>
-              </div>
-
-              {/* Analytics Preview Box from Video */}
-              <div className="col-span-2 bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <Info size={16} className="text-indigo-600" />
-                  <span className="text-xs font-black text-indigo-900 uppercase tracking-tight">Analytics Preview</span>
-                </div>
-                <p className="text-xs text-indigo-700/80 font-medium leading-relaxed">
-                  Based on active users, this offer is estimated to increase conversions by <strong className="text-indigo-900">+12.5%</strong> with a margin impact of <strong className="text-red-600">-4.5%</strong>.
-                </p>
-              </div>
-
-              <div className="col-span-2 flex justify-end gap-3 pt-4">
-                <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-sm font-bold text-slate-400 hover:text-slate-600">Cancel</button>
-                <button className="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg shadow-slate-200">Save Offer</button>
-              </div>
-            </div>
+    {isModalOpen && (
+  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      
+      {/* Modal Header */}
+      <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <h2 className="text-xl font-black text-slate-900">Create New Offer</h2>
+        <button 
+          onClick={() => setIsModalOpen(false)} 
+          className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-100 shadow-sm transition"
+        >
+          <X size={20}/>
+        </button>
+      </div>
+      
+      {/* Modal Body Container */}
+      <div className="p-8 grid grid-cols-2 gap-6 max-h-[75vh] overflow-y-auto">
+        
+        {/* Offer Name Input */}
+        <div className="col-span-2">
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Offer Name</label>
+          <input 
+            type="text" 
+            placeholder="e.g. Diwali Special" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+        
+        {/* Offer Type Dropdown */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Offer Type</label>
+          <div className="relative">
+            <select className="w-full appearance-none px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none cursor-pointer">
+              <option>Festival</option>
+              <option>New User</option>
+              <option>Coupon</option>
+              <option>Happy Hour</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
         </div>
-      )}
+
+        {/* Discount Type Dropdown */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Discount Type</label>
+          <div className="relative">
+            <select className="w-full appearance-none px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none cursor-pointer">
+              <option>Percent (%)</option>
+              <option>Flat Amount (₹)</option>
+              <option>Free Minutes</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+          </div>
+        </div>
+
+        {/* Discount Value Input */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Discount Value</label>
+          <input 
+            type="number" 
+            placeholder="50" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* Max Cap Input */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Max Cap (₹)</label>
+          <input 
+            type="text" 
+            placeholder="1000" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* Start Date Selection */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Start Date</label>
+          <input 
+            type="date" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* End Date Selection */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">End Date</label>
+          <input 
+            type="date" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* Usage Limit Field */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Usage Limit (per user)</label>
+          <input 
+            type="number" 
+            placeholder="1" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* Priority Assignment Field */}
+        <div>
+          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Priority (1-100)</label>
+          <input 
+            type="number" 
+            placeholder="10" 
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/10 outline-none" 
+          />
+        </div>
+
+        {/* Analytics Preview Box */}
+        <div className="col-span-2 bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl">
+          <div className="flex items-center gap-2 mb-2">
+            <Info size={16} className="text-indigo-600" />
+            <span className="text-xs font-black text-indigo-900 uppercase tracking-tight">Analytics Preview</span>
+          </div>
+          <p className="text-xs text-indigo-700/80 font-medium leading-relaxed">
+            Based on active users, this offer is estimated to increase conversions by <strong className="text-indigo-900">+12.5%</strong> with a margin impact of <strong className="text-red-600">-4.5%</strong>.
+          </p>
+        </div>
+
+        {/* Actions Button Block */}
+        <div className="col-span-2 flex justify-end gap-3 pt-4">
+          <button 
+            type="button"
+            onClick={() => setIsModalOpen(false)} 
+            className="px-6 py-2.5 text-sm font-bold text-slate-400 hover:text-slate-600 transition"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit"
+            className="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition"
+          >
+            Save Offer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

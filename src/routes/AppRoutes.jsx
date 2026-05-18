@@ -19,6 +19,7 @@ import DashboardContent from "../pages/adminPanel/creatorConsole/myDashboard";
 import ReferralPage from "../pages/adminPanel/creatorConsole/myReferrals";
 import ReferralDashboard from "../pages/adminPanel/creatorConsole/myReferrals";
 import OffersDashboard from "../pages/adminPanel/Offers/dashboard";
+import RuleEngine from "../pages/adminPanel/Offers/ruleEngine";
 import OfferManagement from "../pages/adminPanel/Offers/offerManagement";
 
 const AppRoutes = () => {
@@ -52,7 +53,7 @@ const AppRoutes = () => {
               <Route path="Offers">
               <Route path="dashboard" element={<OffersDashboard/>} />
               <Route path="offerManagement" element={<OfferManagement/>} />
-              <Route path="ruleEngine" element={<div>Rule Engine</div>} />
+              <Route path="ruleEngine" element={<RuleEngine/>} />
               <Route path="listenerPricing" element={<div>Listener Pricing</div>} />
               <Route path="subscription" element={<div>Subscription</div>} />
               <Route path="userInsights" element={<div>User Insights</div>} />
