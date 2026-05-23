@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useGetAdminCoachProfileQuery 
   ,useGetRecentActivityQuery, 
+  useGetDailyStatsQuery,
   useGetCoachPerformanceQuery,
 useGetCoachFinancialsQuery,
 useGetActivityLogsQuery} from "../../../store/api/auth/adminLogin";
@@ -20,7 +21,11 @@ export default function ListenerProfile() {
     { skip: !coachId }
   );
 
+  const { data: dailyStatsData, isLoading: dailyStatsLoading } =
+  useGetDailyStatsQuery({ coachId });
+
   const listener = data?.data?.adminCoachProfile;
+  const dailyStats = dailyStatsData?.data?.dailyStats;
 
   const {
   data: recentActivityData,
@@ -116,17 +121,22 @@ const activityLogs =
             className="w-20 h-20 rounded-full object-cover border border-gray-100" 
           />
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold">{listener.displayName || "Unknown Name"}</h2>
+            <h2 className="text-2xl font-semibold">{listener.displayName}</h2>
             <p className="text-sm text-gray-500 mt-1">ID: {coachId} • Joined {new Date(listener.appliedDate).toLocaleDateString()}</p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="px-2 py-1 text-xs font-medium bg-gray-100 rounded-md">{listener.role || "EXTERNAL"}</span>
-              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-600 rounded-md">{listener.experienceLevel || "Normal"}</span>
-              <span className={`px-2 py-1 text-xs font-medium rounded-md ${listener.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                {listener.status || "N/A"}
+              <span className="px-2 py-1 text-xs font-medium bg-gray-100 rounded-md">{listener.coachType }</span>
+              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-600 rounded-md">{listener.coachLevelName}</span>
+              <span className={`px-2 py-1 text-xs font-medium rounded-md ${listener.accountStatus === 'Active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                {listener.accountStatus }
               </span>
               <span className="ml-2 text-yellow-500 font-semibold text-sm">
-                ★ {listener.averageRating || "0.0"} <span className="text-gray-400 font-normal">({listener.reviewCount || 0} reviews)</span>
+                ★ {listener.rankingScore } <span className="text-gray-400 font-normal">({listener.reviewCount || 0} reviews)</span>
               </span>
+
+                {/* Total Calls */}
+  <span className="text-gray-700 text-sm font-medium flex items-center gap-1">
+    🎧 {listener.totalCalls } Total Calls
+  </span>
             </div>
           </div>
           <div className="flex gap-3">
@@ -157,25 +167,36 @@ const activityLogs =
           
           {/* Main Content (Left) */}
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* Daily Stats Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-lg mb-6">Daily Stats (Today)</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Calls Taken</p>
-                  <p className="text-3xl font-bold">{listener.dailyStats?.callsTaken || 18}</p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Talk Time</p>
-                  <p className="text-3xl font-bold">{listener.dailyStats?.talkTime || "4h 15m"}</p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Earnings</p>
-                  <p className="text-3xl font-bold text-green-600">₹{(listener.dailyStats?.earnings || 8450).toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
+       
+          {/* Daily Stats Section */}
+<div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+  <h3 className="font-bold text-lg mb-6">Daily Stats (Today)</h3>
+
+  <div className="grid grid-cols-3 gap-4">
+    
+    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+      <p className="text-sm text-gray-500 mb-1">Calls Taken</p>
+      <p className="text-3xl font-bold">
+        {dailyStats?.callsTaken }
+      </p>
+    </div>
+
+    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+      <p className="text-sm text-gray-500 mb-1">Talk Time</p>
+      <p className="text-3xl font-bold">
+        {dailyStats?.talkTime }
+      </p>
+    </div>
+
+    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+      <p className="text-sm text-gray-500 mb-1">Earnings</p>
+      <p className="text-3xl font-bold text-green-600">
+        ₹{dailyStats?.earnings }
+      </p>
+    </div>
+
+  </div>
+</div>
 
             {/* Recent Activity Feed */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -305,7 +326,7 @@ const activityLogs =
         </div>
       )}
 
-      {/* PERFORMANCE TAB */}
+      
       {/* PERFORMANCE TAB */}
 {activeTab === "Performance" && (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-300">

@@ -29,17 +29,16 @@ export default function ListenerApprovalsPage() {
       size: 10,
       status: "VERIFIED",
     });
-
-  const [search, setSearch] = useState("");
-  const [level, setLevel] = useState("All Levels");
-  const [type, setType] = useState("All Types");
-  const [status, setStatus] = useState("All Status");
-  const [online, setOnline] = useState("Online & Offline");
+const [search, setSearch] = useState("");
+const [level, setLevel] = useState("");
+const [type, setType] = useState("");
+const [status, setStatus] = useState("");
+const [online, setOnline] = useState("");
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedCoachId, setSelectedCoachId] = useState(null);
-  const [selectedLevel, setSelectedLevel] = useState("New");
-  const [selectedType, setSelectedType] = useState("EXTERNAL");
+  const [selectedLevel, setSelectedLevel] = useState();
+  const [selectedType, setSelectedType] = useState();
   const [internalNotes, setInternalNotes] = useState("");
 
   const approvals = approvalData?.data?.adminCoachDashboard?.content || [];
@@ -72,20 +71,35 @@ const documents = [
   const [updateCoachStatus, { isLoading: statusLoading }] = useUpdateCoachStatusMutation();
 
   const filteredListeners = listeners.filter((user) => {
-    return (
-      (search === "" ||
-        user.displayName?.toLowerCase().includes(search.toLowerCase()) ||
-        user.coachId?.toLowerCase().includes(search.toLowerCase())) &&
-      (level === "All Levels" || user.coachLevelName === level) &&
-      (type === "All Types" || user.coachType === type) &&
-      (status === "All Status" ||
-        (status === "Active" && user.visibilityStatus === "VISIBLE") ||
-        (status === "Blocked" && user.visibilityStatus !== "VISIBLE")) &&
-      (online === "Online & Offline" ||
-        (online === "Online" && user.online) ||
-        (online === "Offline" && !user.online))
-    );
-  });
+  const matchesSearch =
+    !search ||
+    user.displayName?.toLowerCase().includes(search.toLowerCase()) ||
+    user.coachId?.toLowerCase().includes(search.toLowerCase());
+
+  const matchesLevel =
+    !level || user.coachLevelName?.toUpperCase() === level;
+
+  const matchesType =
+    !type || user.coachType?.toUpperCase() === type;
+
+  const matchesStatus =
+    !status || user.accountStatus?.toUpperCase() === status;
+
+  const matchesOnline =
+    online === ""
+      ? true
+      : online === "true"
+      ? user.online === true
+      : user.online === false;
+
+  return (
+    matchesSearch &&
+    matchesLevel &&
+    matchesType &&
+    matchesStatus &&
+    matchesOnline
+  );
+});
 
   if (approvalLoading || listenerLoading) {
     return <div className="p-6 text-center">Loading data...</div>;
@@ -231,6 +245,7 @@ const documents = [
     {/* SEARCH */}
     <div className="relative">
       <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+
       <input
         type="text"
         placeholder="Search ID or Name"
@@ -243,30 +258,61 @@ const documents = [
 
   {/* CARD */}
   <div className="bg-white rounded-2xl border border-[#efe7df] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+    
     {/* FILTER BAR */}
     <div className="flex flex-wrap gap-3 px-6 py-4 bg-[#f7f3ee] border-b border-[#eee6dd]">
-      {[
-        { value: level, set: setLevel, options: ["All Levels", "Expert", "Celebrity"] },
-        { value: type, set: setType, options: ["All Types", "INTERNAL", "EXTERNAL"] },
-        { value: status, set: setStatus, options: ["All Status", "Active", "Blocked"] },
-        { value: online, set: setOnline, options: ["Online & Offline", "Online", "Offline"] }
-      ].map((filter, i) => (
-        <select
-          key={i}
-          value={filter.value}
-          onChange={(e) => filter.set(e.target.value)}
-          className="px-4 py-2 text-sm border border-[#e6e0d9] rounded-xl bg-white text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
-        >
-          {filter.options.map((opt, idx) => (
-            <option key={idx} value={opt}>{opt}</option>
-          ))}
-        </select>
-      ))}
+
+      {/* LEVEL FILTER */}
+      <select
+        value={level}
+        onChange={(e) => setLevel(e.target.value)}
+        className="px-4 py-2 text-sm border border-[#e6e0d9] rounded-xl bg-white text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
+      >
+        <option value="">All Levels</option>
+        <option value="NEW">NEW</option>
+        <option value="EXPERT">EXPERT</option>
+        <option value="PREMIUM">PREMIUM</option>
+      </select>
+
+      {/* TYPE FILTER */}
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        className="px-4 py-2 text-sm border border-[#e6e0d9] rounded-xl bg-white text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
+      >
+        <option value="">All Types</option>
+        <option value="INTERNAL">INTERNAL</option>
+        <option value="EXTERNAL">EXTERNAL</option>
+      </select>
+
+      {/* STATUS FILTER */}
+      <select
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
+        className="px-4 py-2 text-sm border border-[#e6e0d9] rounded-xl bg-white text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
+      >
+        <option value="">All Status</option>
+        <option value="ACTIVE">ACTIVE</option>
+        <option value="INACTIVE">INACTIVE</option>
+        <option value="SUSPENDED">SUSPENDED</option>
+      </select>
+
+      {/* ONLINE FILTER */}
+      <select
+        value={online}
+        onChange={(e) => setOnline(e.target.value)}
+        className="px-4 py-2 text-sm border border-[#e6e0d9] rounded-xl bg-white text-gray-700 outline-none hover:bg-gray-50 cursor-pointer"
+      >
+        <option value="">Online & Offline</option>
+        <option value="true">Online</option>
+        <option value="false">Offline</option>
+      </select>
     </div>
 
     {/* SCROLLABLE TABLE WRAPPER */}
     <div className="overflow-x-auto">
       <div className="min-w-[1000px]">
+
         {/* TABLE HEADER */}
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1.2fr] px-8 py-4 text-xs font-bold text-gray-500 uppercase border-b border-[#eee6dd] bg-white">
           <span>ID & Name</span>
@@ -281,19 +327,23 @@ const documents = [
 
         {/* ROWS */}
         <div className="divide-y divide-[#f3ede7]">
-          {filteredListeners.map((user) => (
+        {filteredListeners?.map((user) => (
             <div
               key={user.coachId}
               className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1.2fr] px-8 py-5 items-center hover:bg-[#faf7f4] transition-colors"
             >
+              
               {/* USER */}
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
                   <img
-                    src={user.profilePhoto || "/default-avatar.png"}
+                    src={
+                      user.profilePhoto 
+                    }
                     alt="avatar"
                     className="rounded-full w-[40px] h-[40px] object-cover border border-gray-100"
                   />
+
                   {user.online === true && (
                     <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                   )}
@@ -303,64 +353,89 @@ const documents = [
                   <p className="text-[14px] font-bold text-gray-800 truncate">
                     {user.displayName}
                   </p>
-                  <p className="text-[12px] text-gray-500">L-{user.coachId}</p>
+
+                  <p className="text-[12px] text-gray-500">
+                    L-{user.coachId}
+                  </p>
                 </div>
               </div>
 
               {/* TYPE */}
               <div>
-                <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold tracking-wide w-fit ${
-                  user.coachType === "INTERNAL"
-                    ? "bg-[#efe7ff] text-purple-600"
-                    : "bg-[#f1f3f5] text-gray-600"
-                }`}>
+                <span
+                  className={`text-[11px] px-2.5 py-1 rounded-md font-bold tracking-wide w-fit ${
+                    user.coachType === "INTERNAL"
+                      ? "bg-[#efe7ff] text-purple-600"
+                      : "bg-[#f1f3f5] text-gray-600"
+                  }`}
+                >
                   {user.coachType}
                 </span>
               </div>
 
               {/* LEVEL */}
               <span className="text-sm text-gray-700 flex items-center gap-1.5 font-medium">
-                {user.coachLevelName === "Celebrity" && <span className="text-yellow-500">🌟</span>}
-                {user.coachLevelName === "Expert" && <span className="text-blue-500">🏅</span>}
-                {user.coachLevelName}
+                {user.coachLevelName === "Celebrity" && (
+                  <span className="text-yellow-500">🌟</span>
+                )}
+
+                {user.coachLevelName === "Expert" && (
+                  <span className="text-blue-500">🏅</span>
+                )}
+
+                {user.coachLevelName || "N/A"}
               </span>
 
               {/* STATUS */}
               <div>
                 <span
                   className={`text-[11px] px-3 py-1 rounded-full font-bold w-fit ${
-                    user.visibilityStatus === "VISIBLE"
+                    user.accountStatus === "ACTIVE"
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-600"
                   }`}
                 >
-                  {user.visibilityStatus === "VISIBLE" ? "Active" : "Blocked"}
+                  {user.accountStatus || "N/A"}
                 </span>
               </div>
 
               {/* RATING */}
               <span className="flex items-center gap-1 text-sm font-bold text-gray-700">
-                <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                {user.rankingScore}
+                <Star
+                  size={14}
+                  className="text-yellow-500 fill-yellow-500"
+                />
+
+                {user.rankingScore || 0}
               </span>
 
               {/* CALLS */}
               <span className="text-sm text-gray-600 font-medium">
-                {user.totalCalls}
+                {user.totalCalls || 0}
               </span>
 
               {/* EARNINGS */}
               <span className="text-sm font-bold text-green-600">
-                ₹{user.todayEarnings}
+                ₹{user.todayEarnings || 0}
               </span>
 
               {/* ACTION */}
               <div
-                onClick={() => navigate(`/adminPanel/listenerManagement/listeners/${user.coachId}`)}
+                onClick={() =>
+                  navigate(
+                    `/adminPanel/listenerManagement/listeners/${user.coachId}`
+                  )
+                }
                 className="flex justify-end items-center gap-1 text-gray-500 hover:text-gray-900 cursor-pointer transition-colors group"
               >
-                <span className="text-sm font-semibold">View Profile</span>
-                <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                <span className="text-sm font-semibold">
+                  View Profile
+                </span>
+
+                <ChevronRight
+                  size={18}
+                  className="group-hover:translate-x-0.5 transition-transform"
+                />
               </div>
             </div>
           ))}
@@ -395,7 +470,7 @@ const documents = [
                         Applicant Review
                       </h2>
                       <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-                        {data?.verificationStatus || "N/A"}
+                        {data?.profileStatus || "N/A"}
                       </span>
                     </div>
                     <button
@@ -430,9 +505,7 @@ const documents = [
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
                           {data?.coachId || "N/A"} •{" "}
-                          {data?.experienceYears
-                            ? `${data.experienceYears} yrs`
-                            : "N/A"}
+                          {data?.experienceYears } yrs
                         </p>
                         <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm text-gray-600">
                           <span>📧 {data?.email || "N/A"}</span>
@@ -484,17 +557,17 @@ const documents = [
                         </div>
                       )}
 
-                      <div className="flex gap-3">
-                        {[1, 2, 3].map((i) => (
-                          <img
-                            key={i}
-                            src={`https://i.pravatar.cc/150?img=${i}`}
-                            alt={`Preview ${i}`}
-                            onClick={() => setPreviewImage(`https://i.pravatar.cc/600?img=${i}`)}
-                            className="w-24 h-24 rounded-xl object-cover cursor-pointer"
-                          />
-                        ))}
-                      </div>
+                    <div className="flex gap-3 flex-wrap">
+  {data?.galleryImageKeys?.map((photo, i) => (
+    <img
+      key={i}
+      src={photo}
+      alt={`Gallery ${i}`}
+      onClick={() => setPreviewImage(photo)}
+      className="w-24 h-24 rounded-xl object-cover cursor-pointer"
+    />
+  ))}
+</div>
                     </div>
 
                     {/* DOCUMENT SECTION (NEW) */}

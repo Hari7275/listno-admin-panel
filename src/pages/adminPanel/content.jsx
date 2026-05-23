@@ -1,4 +1,5 @@
-import { Eye, Pencil, Trash2, Plus } from "lucide-react";
+import React, { useState } from 'react';
+import { Eye, Pencil,X, ChevronDown,Trash2,UploadCloud, Plus } from "lucide-react";
 
 const contentData = [
   {
@@ -69,7 +70,12 @@ const contentData = [
   },
 ];
 
+
 export default function ContentPage() {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  
+
   return (
     <div>
       {/* Header */}
@@ -81,9 +87,16 @@ export default function ContentPage() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-5 py-2 rounded-lg shadow">
+      {/*  <button className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-5 py-2 rounded-lg shadow">
           <Plus size={18} /> Add Content
-        </button>
+        </button> */}
+        <button 
+                      onClick={() => setIsModalOpen(true)}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90 transition text-white px-5 py-2.5 rounded-lg flex items-center text-sm font-bold transition-all shadow-lg shadow-indigo-100 animate-glow"
+                    >
+                      <Plus size={18} className="mr-2" />
+                      Create Article
+                    </button>
       </div>
 
       {/* Stats */}
@@ -205,6 +218,61 @@ export default function ContentPage() {
           </div>
         </div>
       </div>
+
+ {/* CREATE ARTICLE MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Create New Article</h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-700 transition-colors bg-gray-100 hover:bg-gray-200 p-1.5 rounded-full"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-5 flex-1">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Article Title</label>
+                <input type="text" placeholder="Enter an engaging title..." className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition-all" />
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Category</label>
+                  <div className="relative">
+                    <select className="appearance-none w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer">
+                      <option>Mental Health & Therapy</option>
+                      <option>Career & Growth Coaching</option>
+                    </select>
+                    <ChevronDown size={16} className="absolute right-3 top-3.5 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Author</label>
+                  <input type="text" defaultValue="Admin User" className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cover Image</label>
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-indigo-50/50 hover:border-indigo-300 transition-all cursor-pointer group">
+                  <UploadCloud size={32} className="mb-2 text-gray-400 group-hover:text-indigo-500" />
+                  <span className="text-sm font-semibold text-gray-400">Click or drag image to upload</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Content</label>
+                <textarea rows="4" placeholder="Write your content..." className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"></textarea>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3 rounded-b-xl">
+              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-all">Cancel</button>
+              <button className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-sm">Publish Article</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

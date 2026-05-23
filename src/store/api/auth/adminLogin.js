@@ -84,6 +84,7 @@ getAdminCoachDashboard: builder.query({
       query: `
         query {
           adminCoachDashboard(page: ${page}, size: ${size}, status: "${status}") {
+          
             content {
               coachId
               displayName
@@ -91,7 +92,6 @@ getAdminCoachDashboard: builder.query({
               appliedDate
               online
               coachType
-              verificationStatus
               profilePhoto
               bio
               rankingScore
@@ -101,7 +101,8 @@ getAdminCoachDashboard: builder.query({
               cityName
               cityId
               stateName
-              visibilityStatus
+              profileStatus
+              accountStatus
               gender
               age
               introVideo
@@ -132,6 +133,7 @@ getAdminCoachProfile: builder.query({
       query: `
         query GetAdminCoachProfile($coachId: ID!) {
           adminCoachProfile(coachId: $coachId) {
+
             coachId
             displayName
             profilePhoto
@@ -140,30 +142,44 @@ getAdminCoachProfile: builder.query({
             age
             email
             phone
+
             coachType
-            verificationStatus
+            coachLevelName
+
+            rankingScore
+            totalCalls
+            todayEarnings
+            galleryImageKeys
             visibilityStatus
+            profileStatus
+            accountStatus
+
             categoryNames
+
             cityName
+            cityId
             stateName
+
             introVideo
             aadhaarCardFrontKey
             aadhaarCardBackKey
             voiceSample
+
             experienceYears
             experienceHours
-            coachLevelName
-            totalCalls
-            todayEarnings
+
             appliedDate
             online
           }
         }
       `,
-      variables: { coachId },
+      variables: {
+        coachId,
+      },
     },
   }),
 }),
+
 
 updateCoachStatus: builder.mutation({
   query: ({ coachId, status, bodyData }) => ({
@@ -276,6 +292,26 @@ getCoachFinancials: builder.query({
   }),
 }),
 
+
+getDailyStats: builder.query({
+  query: ({ coachId }) => ({
+    url: "/experience/listeno/graphql",
+    method: "POST",
+    body: {
+      query: `
+        query {
+          dailyStats(coachId: "${coachId}") {
+            callsTaken
+            talkTime
+            earnings
+          }
+        }
+      `,
+      variables: {},
+    },
+  }),
+}),
+
 getActivityLogs: builder.query({
   query: ({ userId }) => ({
     url: "/experience/listeno/graphql",
@@ -371,6 +407,7 @@ export const {useCreateRegisterDeviceMutation,
     useGetRecentActivityQuery,
     useGetCoachPerformanceQuery,
     useGetCoachFinancialsQuery,
+    useGetDailyStatsQuery,
     useGetActivityLogsQuery,
     useGetAdminLiveMonitoringQuery,
     useGetDailyPerformanceQuery,
