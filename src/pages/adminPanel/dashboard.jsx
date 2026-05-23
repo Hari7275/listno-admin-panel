@@ -56,7 +56,6 @@ export default function DashboardPage() {
     { name: "Messages", icon: MessageSquare, path: "/messages" },
     { name: "Settings", icon: Settings, path: "/settings" },
   ];
-
   const userGrowth = [
     { name: "Mon", value: 120 },
     { name: "Tue", value: 150 },
@@ -65,6 +64,7 @@ export default function DashboardPage() {
     { name: "Fri", value: 200 },
     { name: "Sat", value: 240 },
     { name: "Sun", value: 210 },
+   
   ];
 
   const sessions = [
